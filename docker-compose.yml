@@ -1,0 +1,94 @@
+# Runs the four services of the deployment view as containers.
+#
+#   browser  -> browser-frontend (:3000) -\
+#                                          >-> gateway (:8090) -> calculator (internal :8091)
+#   mobile   -> mobile-frontend  (:3001) -/
+#
+# Two networks enforce the C&C topology: the frontends can only reach the
+# gateway, and only the gateway can reach the calculator.
+name: calculator
+
+services:
+  calculator:
+    build:
+      context: ./backend
+      args:
+        SERVICE: calculator
+    environment:
+      PORT: "8091"
+    expose:
+      - "8091"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8091/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ./backend
+      args:
+        SERVICE: gateway
+    environment:
+      PORT: "8090"
+      CALCULATOR_URL: http://calculator:8091
+      UPSTREAM_TIMEOUT: 5s
+    ports:
+      - "8090:8090"
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      calculator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8090/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  browser-frontend:
+    build: ./frontend/browser
+    environment:
+      GATEWAY_URL: http://gateway:8090
+    ports:
+      - "3000:80"
+    networks:
+      - frontend
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  mobile-frontend:
+    build: ./frontend/mobile
+    environment:
+      GATEWAY_URL: http://gateway:8090
+    ports:
+      - "3001:80"
+    networks:
+      - frontend
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  frontend:
+  backend:
