@@ -1,0 +1,233 @@
+:root {
+  --bg: #11151f;
+  --display-text: #f5f7fb;
+  --muted: #8b95a8;
+  --key-digit: #262d3d;
+  --key-function: #3a4357;
+  --key-operator: #f59e0b;
+  --key-operator-text: #11151f;
+  --key-active: #fde68a;
+  --key-text: #f5f7fb;
+  --danger: #ff8a7a;
+  --gap: 12px;
+
+  color-scheme: dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--display-text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+p,
+h1 {
+  margin: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Full-height phone layout; centred column on larger screens. */
+.app {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 20px;
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+.display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 140px;
+  padding: 0 8px;
+  text-align: right;
+}
+
+.display__expression {
+  font-size: 1.125rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.display__value {
+  display: block;
+  max-width: 100%;
+  font-size: 4rem;
+  font-weight: 300;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  transition: opacity 150ms;
+}
+
+.display__value--sm {
+  font-size: 2.75rem;
+}
+
+.display__value--xs {
+  font-size: 2rem;
+}
+
+.display__value--pending {
+  opacity: 0.4;
+}
+
+.display__error {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--danger);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap);
+}
+
+.key {
+  min-height: 64px;
+  aspect-ratio: 1;
+  font: inherit;
+  font-size: 1.625rem;
+  color: var(--key-text);
+  background: var(--key-digit);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: manipulation; /* no double-tap zoom on fast taps */
+  user-select: none;
+  transition:
+    filter 100ms,
+    transform 100ms;
+}
+
+.key:active:not(:disabled) {
+  filter: brightness(1.35);
+  transform: scale(0.96);
+}
+
+.key:focus-visible {
+  outline: 3px solid var(--key-active);
+  outline-offset: 2px;
+}
+
+.key:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.key--function {
+  background: var(--key-function);
+  font-size: 1.375rem;
+}
+
+.key--operator,
+.key--equals {
+  color: var(--key-operator-text);
+  background: var(--key-operator);
+  font-weight: 600;
+}
+
+.key--active {
+  background: var(--key-active);
+}
+
+.key--wide {
+  grid-column: span 2;
+  aspect-ratio: auto;
+  justify-self: stretch;
+  text-align: left;
+  padding-left: 28px;
+}
+
+.key--tall {
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+
+/* Small phones (e.g. iPhone SE, 320–375px wide). */
+@media (max-width: 360px) {
+  :root {
+    --gap: 8px;
+  }
+
+  .key {
+    min-height: 56px;
+    font-size: 1.375rem;
+  }
+
+  .display__value {
+    font-size: 3.25rem;
+  }
+}
+
+/* Short screens (e.g. 320×568): square keys would overflow, so flatten them. */
+@media (max-height: 700px) {
+  :root {
+    --gap: 8px;
+  }
+
+  .app {
+    gap: 12px;
+  }
+
+  .display {
+    min-height: 96px;
+  }
+
+  .key {
+    min-height: 52px;
+    aspect-ratio: auto;
+  }
+}
+
+/* Landscape phones: drop the square keys so everything fits vertically. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app {
+    max-width: 640px;
+    gap: 8px;
+  }
+
+  .display {
+    min-height: 80px;
+  }
+
+  .key {
+    min-height: 40px;
+    aspect-ratio: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
